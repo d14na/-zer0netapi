@@ -1,7 +1,7 @@
 {
-  "name": "zeronetdb",
-  "version": "19.1.19",
-  "description": "Zer0netDb clearnet gateway.",
+  "name": "zer0netapi",
+  "version": "19.2.26",
+  "description": "Zer0netDb Clearnet API.",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
