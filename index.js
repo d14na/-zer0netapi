@@ -9,18 +9,23 @@ const ABI = {
 }
 
 const DEFAULT_GAS = '200000'
-const DEFAULT_PORT = 3000
+// const DEFAULT_PORT = 3000
 
 // const SOCKET_URL = 'https://socket.etherdelta.com'
 const SOCKET_URL = 'https://socket.forkdelta.app'
 
-const MAINNET_PROVIDER = 'https://mainnet.infura.io/v3/f949bf662a6e4abca81bf0201f06b97d'
-const ROPSTEN_PROVIDER = 'https://ropsten.infura.io/v3/f949bf662a6e4abca81bf0201f06b97d'
+/* Initialize blockchain provider. */
+let provider = null
 
-const web3 = {
-    mainnet: new Web3(new Web3.providers.HttpProvider(MAINNET_PROVIDER)),
-    ropsten: new Web3(new Web3.providers.HttpProvider(ROPSTEN_PROVIDER))
+/* Select (http) provider. */
+if (process.env.NODE_ENV === 'production') {
+    provider = 'https://mainnet.infura.io/v3/f949bf662a6e4abca81bf0201f06b97d'
+} else {
+    provider = 'https://ropsten.infura.io/v3/f949bf662a6e4abca81bf0201f06b97d'
 }
+
+/* Initialize web3. */
+const web3 = new Web3(new Web3.providers.HttpProvider(provider))
 
 /* Add CORS. */
 app.use(function (req, res, next) {
@@ -28,7 +33,24 @@ app.use(function (req, res, next) {
     next()
 })
 
-const _retrieveData = function (_network, _func, _key) {
+/**
+ * Retrieve the endpoint.
+ */
+const _getEndpoint = function (_path) {
+    /* Set current version. */
+    const version = 'v1'
+
+    if (process.env.NODE_ENV === 'production') {
+        return `/${version}/${_path}`
+    } else {
+        return `/${version}/ropsten/${_path}`
+    }
+}
+
+/**
+ * Retrieve the data.
+ */
+const _retrieveData = function (_func, _key) {
     /* Initialize promise. */
     return new Promise(function (_resolve, _reject) {
         // console.log('KEY', key)
@@ -36,10 +58,14 @@ const _retrieveData = function (_network, _func, _key) {
         /* Initialize contract address. */
         let contractAddress = ''
 
-        /* Set network. */
-        if (_network === 'mainnet') {
+        /* Initialize network. */
+        let network = null
+
+        if (process.env.NODE_ENV === 'production') {
+            // Mainnet
             contractAddress = '0xE865Fe1A1A3b342bF0E2fcB11fF4E3BCe58263af'
         } else {
+            // Ropsten
             contractAddress = '0x4C2f68bCdEEB88764b1031eC330aD4DF8d6F64D6'
         }
 
@@ -47,7 +73,7 @@ const _retrieveData = function (_network, _func, _key) {
         const abi = ABI.zeronetDb
 
         /* Initialize contract. */
-        const myContract = new web3[_network]['eth'].Contract(
+        const myContract = new web3['eth'].Contract(
             abi, contractAddress)
 
         const options = { }
@@ -85,166 +111,91 @@ const _retrieveData = function (_network, _func, _key) {
     })
 }
 
-/*******************************************************************************
-
-  MAINNET
-
-*******************************************************************************/
-
 // https://db.0net.io/v1/getAddress
-app.get('/v1/getAddress/:key', async (req, res) => {
+app.get(_getEndpoint('getAddress/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getAddress', hashKey)
+    const data = await _retrieveData('getAddress', hashKey)
 
     /* Return data. */
     res.json(data)
 })
 
 // https://db.0net.io/v1/getBool
-app.get('/v1/getBool/:key', async (req, res) => {
+app.get(_getEndpoint('getBool/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getBool', hashKey)
+    const data = await _retrieveData('getBool', hashKey)
 
     /* Return data. */
     res.json(data)
 })
 
 // https://db.0net.io/v1/getBytes
-app.get('/v1/getBytes/:key', async (req, res) => {
+app.get(_getEndpoint('getBytes/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getBytes', hashKey)
+    const data = await _retrieveData('getBytes', hashKey)
 
     /* Return data. */
     res.json(data)
 })
 
 // https://db.0net.io/v1/getInt
-app.get('/v1/getInt/:key', async (req, res) => {
+app.get(_getEndpoint('getInt/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getInt', hashKey)
+    const data = await _retrieveData('getInt', hashKey)
 
     /* Return data. */
     res.json(data)
 })
 
 // https://db.0net.io/v1/getString
-app.get('/v1/getString/:key', async (req, res) => {
+app.get(_getEndpoint('getString/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getString', hashKey)
+    const data = await _retrieveData('getString', hashKey)
 
     /* Return data. */
     res.json(data)
 })
 
 // https://db.0net.io/v1/getUint
-app.get('/v1/getUint/:key', async (req, res) => {
+app.get(_getEndpoint('getUint/:key'), async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
     /* Retrieve data. */
-    const data = await _retrieveData('mainnet', 'getUint', hashKey)
+    const data = await _retrieveData('getUint', hashKey)
 
     /* Return data. */
     res.json(data)
 })
-
-/*******************************************************************************
-
-  ROPSTEN
-
-*******************************************************************************/
-
-// https://db.0net.io/v1/ropsten/getAddress
-app.get('/v1/ropsten/getAddress/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getAddress', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-// https://db.0net.io/v1/ropsten/getBool
-app.get('/v1/ropsten/getBool/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getBool', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-// https://db.0net.io/v1/ropsten/getBytes
-app.get('/v1/ropsten/getBytes/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getBytes', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-// https://db.0net.io/v1/ropsten/getInt
-app.get('/v1/ropsten/getInt/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getInt', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-// https://db.0net.io/v1/ropsten/getString
-app.get('/v1/ropsten/getString/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getString', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-// https://db.0net.io/v1/ropsten/getUint
-app.get('/v1/ropsten/getUint/:key', async (req, res) => {
-    /* Retrieve hash key. */
-    const hashKey = req['params'].key
-
-    /* Retrieve data. */
-    const data = await _retrieveData('ropsten', 'getUint', hashKey)
-
-    /* Return data. */
-    res.json(data)
-})
-
-/* Initialize default route. */
-app.get('*', (req, res) => res.send('Welcome to the Zer0netDb Gateway..'))
 
 /* Start listening. */
-app.listen(DEFAULT_PORT, () => {
-    console.log(`Zer0net Database is listening on port ${DEFAULT_PORT}!`)
-})
+if (process.env.NODE_ENV === 'production') {
+    /* Initialize default route. */
+    app.get('*', (req, res) => res.send('<h3>Zer0net Eternal Database Gateway<br />[ MAINNET ]</h3>'))
+
+    app.listen(3000, () => {
+        console.log('\nStarted Zer0net Database v19.3.10 [ MAINNET ]\n')
+    })
+} else {
+    /* Initialize default route. */
+    app.get('*', (req, res) => res.send('<h3>Zer0net Eternal Database Gateway<br />[ ROPSTEN ]</h3>'))
+
+    app.listen(4000, () => {
+        console.log('\nStarted Zer0net Database v19.3.10 [ ROPSTEN ]\n')
+    })
+}
