@@ -34,20 +34,6 @@ app.use(function (req, res, next) {
 })
 
 /**
- * Retrieve the endpoint.
- */
-const _getEndpoint = function (_path) {
-    /* Set current version. */
-    const version = 'v1'
-
-    if (process.env.NODE_ENV === 'production') {
-        return `/${version}/${_path}`
-    } else {
-        return `/${version}/ropsten/${_path}`
-    }
-}
-
-/**
  * Retrieve the data.
  */
 const _retrieveData = function (_func, _key) {
@@ -111,8 +97,11 @@ const _retrieveData = function (_func, _key) {
     })
 }
 
+// favicon
+app.use('/favicon.ico', express.static(__dirname + '/images/favicon.ico'))
+
 // https://db.0net.io/v1/getAddress
-app.get(_getEndpoint('getAddress/:key'), async (req, res) => {
+app.get('/v1/getAddress/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
@@ -124,7 +113,7 @@ app.get(_getEndpoint('getAddress/:key'), async (req, res) => {
 })
 
 // https://db.0net.io/v1/getBool
-app.get(_getEndpoint('getBool/:key'), async (req, res) => {
+app.get('/v1/getBool/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
@@ -136,7 +125,7 @@ app.get(_getEndpoint('getBool/:key'), async (req, res) => {
 })
 
 // https://db.0net.io/v1/getBytes
-app.get(_getEndpoint('getBytes/:key'), async (req, res) => {
+app.get('/v1/getBytes/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
@@ -148,7 +137,7 @@ app.get(_getEndpoint('getBytes/:key'), async (req, res) => {
 })
 
 // https://db.0net.io/v1/getInt
-app.get(_getEndpoint('getInt/:key'), async (req, res) => {
+app.get('/v1/getInt/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
@@ -160,7 +149,7 @@ app.get(_getEndpoint('getInt/:key'), async (req, res) => {
 })
 
 // https://db.0net.io/v1/getString
-app.get(_getEndpoint('getString/:key'), async (req, res) => {
+app.get('/v1/getString/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
@@ -172,7 +161,7 @@ app.get(_getEndpoint('getString/:key'), async (req, res) => {
 })
 
 // https://db.0net.io/v1/getUint
-app.get(_getEndpoint('getUint/:key'), async (req, res) => {
+app.get('/v1/getUint/:key', async (req, res) => {
     /* Retrieve hash key. */
     const hashKey = req['params'].key
 
